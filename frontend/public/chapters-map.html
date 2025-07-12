@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>University Chapters Map - Fixed</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            color: #2d3748;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .stats-container {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .stat-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            min-width: 150px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            display: block;
+        }
+        
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+        
+        .filter-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-btn {
+            padding: 10px 20px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        
+        .filter-btn.active,
+        .filter-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        #map {
+            height: 600px;
+            width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .university-info {
+            max-width: 300px;
+        }
+        
+        .university-info h2 {
+            color: #2d3748;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+        
+        .university-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .university-meta-item {
+            font-size: 0.9em;
+            color: #4a5568;
+        }
+        
+        .university-info p {
+            color: #2d3748;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+        
+        .university-initiatives h3 {
+            color: #2d3748;
+            font-size: 1em;
+            margin-bottom: 8px;
+        }
+        
+        .initiative-list {
+            margin: 0;
+            padding-left: 20px;
+        }
+        
+        .initiative-list li {
+            margin-bottom: 5px;
+            color: #4a5568;
+            font-size: 0.9em;
+        }
+        
+        .legend {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+        
+        .legend h3 {
+            margin-top: 0;
+            color: #2d3748;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-right: 10px;
+            border: 2px solid white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+
+        /* Header and Navigation */
+        header {
+            background-color: #fff;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo img {
+            height: 50px;
+            margin-right: 1rem;
+        }
+        
+        .logo h1 {
+            font-size: 1.5rem;
+            color: #333;
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+            flex-wrap: wrap;
+        }
+        
+        nav ul li {
+            margin-left: 1.5rem;
+        }
+        
+        nav ul li a {
+            color: #333;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        
+        nav ul li a:hover {
+            color: #0066cc;
+        }
+        
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-outline {
+            border: 2px solid #0066cc;
+            color: #0066cc;
+        }
+        
+        .btn-outline:hover {
+            background-color: #0066cc;
+            color: #fff;
+        }
+        
+        .btn-primary {
+            background-color: #0066cc;
+            color: #fff;
+            border: 2px solid #0066cc;
+        }
+        
+        .btn-primary:hover {
+            background-color: #004d99;
+            border-color: #004d99;
+        }
+        
+        /* Mobile Navigation */
+        .hamburger {
+            display: block;
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #333;
+        }
+        nav {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: #fff;
+            box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease;
+            z-index: 1001;
+        }
+        nav.active {
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+        nav ul li {
+            margin: 0;
+            width: 100%;
+            padding: 0.75rem 2rem;
+            border-bottom: 1px solid #eee;
+        }
+        /* Media Queries */
+        @media screen and (max-width: 1024px) {
+            nav ul li {
+                margin-left: 1rem;
+            }
+            
+            .logo h1 {
+                font-size: 1.2rem;
+            }
+        }
+        
+        @media screen and (max-width: 768px) {
+            .hamburger {
+                display: block;
+            }
+            
+            nav {
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background-color: #fff;
+                box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+                max-height: 0;
+                overflow: hidden;
+                transition: max-height 0.5s ease;
+            }
+            
+            nav.active {
+                max-height: 70vh;
+                overflow-y: auto;
+            }
+            
+            nav ul {
+                flex-direction: column;
+                padding: 1rem 0;
+            }
+            
+            nav ul li {
+                margin: 0;
+                width: 100%;
+                padding: 0.75rem 2rem;
+                border-bottom: 1px solid #eee;
+            }
+            
+            .nav-buttons {
+                padding: 1rem 2rem;
+                display: flex;
+                justify-content: center;
+                border-bottom: none;
+            }
+            
+            .logo h1 {
+                font-size: 1rem;
+            }
+        }
+        
+        @media screen and (max-width: 480px) {
+            .logo img {
+                height: 40px;
+            }
+            
+            .logo h1 {
+                font-size: 0.9rem;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .stats-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .filter-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            #map {
+                height: 400px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container header-container">
+            <div class="logo">
+                <img src="assets/images/ysn-logo.jpg" alt="YSN Logo">
+                <h1>Youth Synergy Network</h1>
+            </div>
+            <button class="hamburger" aria-label="Toggle navigation">☰</button>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="about.html">About</a></li>
+                    <li><a href="programs.html">Programs</a></li>
+                    <li><a href="program-details.html">Impacts</a></li>
+                    <li><a href="chapters.html">Chapters</a></li>
+                    <li><a href="leadership.html">Leadership</a></li>
+                    <li><a href="events.html">Events</a></li>
+                    <li><a href="media.html">Media</a></li>
+                    <li><a href="news.html">News</a></li>
+                    <li><a href="blog.html">Blog</a></li>
+                    <li><a href="resources.html">Resources</a></li>
+                    <li><a href="testimonials.html">Testimonials</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                    <li class="nav-buttons"><a href="donate.html" class="btn btn-outline">Donate</a></li>
+                    <li class="nav-buttons"><a href="join-us.html" class="btn btn-primary">Join Us</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    <div class="container">
+        <div class="header">
+            <h1>University Chapters Map</h1>
+            <div class="stats-container">
+                <div class="stat-box">
+                    <span class="stat-number" id="total-chapters">19</span>
+                    <span class="stat-label">Total Chapters</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-number" id="total-members">1500+</span>
+                    <span class="stat-label">Total Members</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-number" id="total-initiatives">76</span>
+                    <span class="stat-label">Total Initiatives</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="filter-container">
+            <button class="filter-btn active" data-year="all">All Years</button>
+            <button class="filter-btn" data-year="2021">2021 (Original)</button>
+            <button class="filter-btn" data-year="2022">2022 (Expansion)</button>
+            <button class="filter-btn" data-year="2023">2023 (New)</button>
+        </div>
+        
+        <div id="map"></div>
+        
+        <div class="legend">
+            <h3>Legend</h3>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #ff7700;"></div>
+                <span>2021 - Original Chapters</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #1e3a8a;"></div>
+                <span>2022 - Expansion Chapters</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #10b981;"></div>
+                <span>2023 - New Chapters</span>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // Initialize map centered on Kenya
+        const map = L.map('map').setView([-1.2921, 36.8219], 7);
+
+        // Add OpenStreetMap tile layer
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        // FIXED: Removed extra opening bracket
+        const universities = [
+            {
+                name: "University of Nairobi",
+                chapterName: "UoN Synergy Chapter",
+                coordinates: [-1.2800, 36.8219],
+                established: 2021,
+                members: "150+",
+                description: "The flagship chapter with a strong focus on constitutional literacy and environmental law advocacy.",
+                initiatives: [
+                    "Weekly legal literacy clinics",
+                    "Campus tree planting campaign",
+                    "Mental health peer counseling",
+                    "High school mentorship program"
+                ]
+            },
+            {
+                name: "Kenyatta University",
+                chapterName: "KU Synergy Leaders",
+                coordinates: [-1.1799, 36.9355],
+                established: 2022,
+                members: "120+",
+                description: "Known for their innovative approach to period dignity and menstrual health education.",
+                initiatives: [
+                    "Monthly sanitary pad drives",
+                    "Gender rights awareness forums",
+                    "Environmental justice campaigns",
+                    "Community legal aid outreach"
+                ]
+            },
+            {
+                name: "Moi University",
+                chapterName: "Moi YSN Chapter",
+                coordinates: [0.5143, 35.2715],
+                established: 2023,
+                members: "95+",
+                description: "Spearheading rural outreach initiatives with strong connections to schools in Eldoret.",
+                initiatives: [
+                    "Rural school adoption program",
+                    "Mental health healing circles",
+                    "Indigenous environmental knowledge preservation",
+                    "Constitutional literacy in mother tongues"
+                ]
+            },
+            {
+                name: "Jomo Kenyatta University of Agriculture and Technology",
+                chapterName: "JKUAT Synergy Hub",
+                coordinates: [-1.0922, 37.0127],
+                established: 2021,
+                members: "110+",
+                description: "Utilizes technology and innovation to address environmental challenges.",
+                initiatives: [
+                    "Tech for climate solutions",
+                    "Digital legal literacy apps",
+                    "Engineering for sustainable communities",
+                    "Mental health technology solutions"
+                ]
+            },
+            {
+                name: "Maseno University",
+                chapterName: "Maseno Change Makers",
+                coordinates: [0.0075, 34.5997],
+                established: 2022,
+                members: "75+",
+                description: "Located in western Kenya focusing on community initiatives around Lake Victoria.",
+                initiatives: [
+                    "Lake Victoria conservation efforts",
+                    "Rural legal awareness campaigns",
+                    "Adolescent mental health support",
+                    "Girls education advocacy"
+                ]
+            },
+            {
+                name: "Egerton University",
+                chapterName: "Egerton Environmental Leaders",
+                coordinates: [-0.3672, 35.9283],
+                established: 2021,
+                members: "90+",
+                description: "Agricultural and environmental focus leveraging the university's research capabilities.",
+                initiatives: [
+                    "Sustainable farming practices",
+                    "Food security legal frameworks",
+                    "Rural environmental justice",
+                    "Farmer mental health outreach"
+                ]
+            },
+            {
+                name: "Technical University of Kenya",
+                chapterName: "TUK Innovators",
+                coordinates: [-1.2929, 36.8172],
+                established: 2023,
+                members: "65+",
+                description: "Bringing technical solutions to social challenges with engineering innovation.",
+                initiatives: [
+                    "Eco-friendly design competitions",
+                    "Reusable sanitary product innovation",
+                    "Legal tech hackathons",
+                    "Engineering for mental health"
+                ]
+            },
+            {
+                name: "University of Eldoret",
+                chapterName: "UoE Legal Eagles",
+                coordinates: [0.5143, 35.2715],
+                established: 2023,
+                members: "80+",
+                description: "Focused on health law and rural development through legal empowerment.",
+                initiatives: [
+                    "Healthcare access legal clinics",
+                    "Rural land rights education",
+                    "Peer mental health support groups",
+                    "Community conflict resolution training"
+                ]
+            },
+            {
+                name: "Laikipia University",
+                chapterName: "Laikipia Legal Advocates",
+                coordinates: [-0.6833, 36.6967],
+                established: 2023,
+                members: "70+",
+                description: "Promoting legal awareness in semi-arid regions of Kenya.",
+                initiatives: [
+                    "Drought resilience legal education",
+                    "Water rights awareness",
+                    "Youth legal empowerment forums",
+                    "Mental health awareness in arid areas"
+                ]
+            },
+            {
+                name: "Kisii University",
+                chapterName: "Kisii Synergy Warriors",
+                coordinates: [-0.6833, 34.7450],
+                established: 2023,
+                members: "60+",
+                description: "Working closely with local leaders to promote human rights and democratic values.",
+                initiatives: [
+                    "Human rights town hall meetings",
+                    "Civic education roadshows",
+                    "Intergenerational mental health dialogues",
+                    "Women's land rights sensitization"
+                ]
+            },
+            {
+                name: "Muranga University of Technology",
+                chapterName: "MUT Legal Technologists",
+                coordinates: [-1.0333, 37.0667],
+                established: 2023,
+                members: "55+",
+                description: "Combining law and technology to solve modern-day legal issues.",
+                initiatives: [
+                    "Blockchain for land documentation",
+                    "AI-driven legal helpdesk",
+                    "Digital civic education platforms",
+                    "Cybersecurity and digital rights"
+                ]
+            },
+            {
+                name: "Chuka University",
+                chapterName: "Chuka Legal Minds",
+                coordinates: [-0.9444, 37.4167],
+                established: 2023,
+                members: "50+",
+                description: "Fostering legal innovation in eastern Kenya.",
+                initiatives: [
+                    "Legal empowerment for youth",
+                    "Community peace-building forums",
+                    "Disaster risk reduction through legal frameworks",
+                    "Mental health awareness in rural schools"
+                ]
+            },
+            {
+                name: "Strathmore University",
+                chapterName: "Strathmore Synergy Hub",
+                coordinates: [-1.3116, 36.8110],
+                established: 2022,
+                members: "85+",
+                description: "Leveraging the university's strength in business and law, focused on legal entrepreneurship.",
+                initiatives: [
+                    "Legal innovation hackathons",
+                    "Climate leadership academy",
+                    "Corporate sustainability partnerships",
+                    "Mental wellness workshops"
+                ]
+            },
+            {
+                name: "Catholic University of Eastern Africa",
+                chapterName: "CUEA Justice Champions",
+                coordinates: [-1.2800, 36.8219],
+                established: 2022,
+                members: "90+",
+                description: "Faith-based legal education with a focus on social justice and ethics.",
+                initiatives: [
+                    "Faith and law integration forums",
+                    "Restorative justice programs",
+                    "Ethical leadership seminars",
+                    "Spiritual wellness and mental health"
+                ]
+            },
+            {
+                name: "United States International University-Africa",
+                chapterName: "USIU Legal Innovators",
+                coordinates: [-1.2151, 36.8647],
+                established: 2021,
+                members: "100+",
+                description: "Global perspective on law with emphasis on international legal systems and human rights.",
+                initiatives: [
+                    "International moot court competitions",
+                    "Cross-border legal clinics",
+                    "Refugee rights awareness",
+                    "Global mental health symposiums"
+                ]
+            },
+            {
+                name: "Riara University",
+                chapterName: "Riara Legal Guardians",
+                coordinates: [-1.3116, 36.8110],
+                established: 2022,
+                members: "75+",
+                description: "Balancing traditional and modern legal education with strong internship programs.",
+                initiatives: [
+                    "Court shadowing program",
+                    "Public interest litigation clinics",
+                    "Legal career mentorship",
+                    "Stress management workshops"
+                ]
+            },
+            {
+                name: "Zetech University",
+                chapterName: "Zetech Legal Enthusiasts",
+                coordinates: [-1.1500, 36.8500],
+                established: 2023,
+                members: "60+",
+                description: "Tech-savvy chapter promoting digital legal literacy and entrepreneurship.",
+                initiatives: [
+                    "Legal tech bootcamps",
+                    "Online dispute resolution platform",
+                    "Start-up legal clinic",
+                    "Digital mental health resources"
+                ]
+            },
+            {
+                name: "Daystar University",
+                chapterName: "Daystar Legal Eagles",
+                coordinates: [-1.1500, 37.0000],
+                established: 2022,
+                members: "65+",
+                description: "Faith-integrated legal education with community service at its core.",
+                initiatives: [
+                    "Church-based legal clinics",
+                    "Christian legal ethics discussions",
+                    "Community mediation services",
+                    "Faith-based mental health support"
+                ]
+            },
+            {
+                name: "Presbyterian University of East Africa",
+                chapterName: "PUEA Legal Pioneers",
+                coordinates: [-1.1500, 37.0000],
+                established: 2023,
+                members: "55+",
+                description: "Faith-driven legal education with strong moral foundations.",
+                initiatives: [
+                    "Faith and law debates",
+                    "Ethical legal practice training",
+                    "Church-led legal aid",
+                    "Faith-based trauma recovery programs"
+                ]
+            }
+        ];
+
+        // Define marker colors based on establishment year
+        function getMarkerColor(year) {
+            if (year === 2021) return '#ff7700'; // Original - Orange
+            if (year === 2022) return '#1e3a8a'; // Expansion - Dark Blue
+            if (year === 2023) return '#10b981'; // New - Green
+            return '#64748b'; // Default
+        }
+
+        // Store all markers for filtering
+        const markers = [];
+        const markersByYear = {
+            2021: [],
+            2022: [],
+            2023: []
+        };
+
+        // Create and add markers for each university
+        universities.forEach(university => {
+            // Create custom icon with color based on establishment year
+            const markerIcon = L.divIcon({
+                className: 'custom-marker',
+                html: `<div style="background-color: ${getMarkerColor(university.established)}; width: 22px; height: 22px; border-radius: 50%; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.3);"></div>`,
+                iconSize: [22, 22],
+                iconAnchor: [11, 11]
+            });
+            
+            // Create popup content
+            const popupContent = `
+                <div class="university-info">
+                    <h2>${university.name}</h2>
+                    <div class="university-meta">
+                        <div class="university-meta-item">
+                            <span><strong>Chapter:</strong> ${university.chapterName}</span>
+                        </div>
+                        <div class="university-meta-item">
+                            <span><strong>Est:</strong> ${university.established}</span>
+                        </div>
+                        <div class="university-meta-item">
+                            <span><strong>Members:</strong> ${university.members}</span>
+                        </div>
+                    </div>
+                    <p>${university.description}</p>
+                    <div class="university-initiatives">
+                        <h3>Key Initiatives:</h3>
+                        <ul class="initiative-list">
+                            ${university.initiatives.map(initiative => `<li>${initiative}</li>`).join('')}
+                        </ul>
+                    </div>
+                </div>
+            `;
+            
+            // Add marker with popup to map
+            const marker = L.marker(university.coordinates, {icon: markerIcon})
+                .addTo(map)
+                .bindPopup(popupContent);
+            
+            // Store marker for filtering
+            markers.push(marker);
+            markersByYear[university.established].push(marker);
+        });
+
+        // Add filter functionality
+        document.querySelectorAll('.filter-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                // Update active state
+                document.querySelectorAll('.filter-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                this.classList.add('active');
+                
+                // Get filter value
+                const yearFilter = this.getAttribute('data-year');
+                
+                // Remove all markers
+                markers.forEach(marker => {
+                    map.removeLayer(marker);
+                });
+                
+                // Add markers based on filter
+                if (yearFilter === 'all') {
+                    markers.forEach(marker => {
+                        map.addLayer(marker);
+                    });
+                    
+                    // Update stats - FIXED: Use dynamic count
+                    document.getElementById('total-chapters').textContent = universities.length;
+                } else {
+                    const year = parseInt(yearFilter);
+                    markersByYear[year].forEach(marker => {
+                        map.addLayer(marker);
+                    });
+                    
+                    // Update stats - FIXED: Use dynamic count
+                    document.getElementById('total-chapters').textContent = markersByYear[year].length;
+                }
+            });
+        });
+
+        // Calculate stats
+        function calculateStats() {
+            let totalMembers = 0;
+            let totalInitiatives = 0;
+            
+            universities.forEach(university => {
+                // Extract numeric value from members string (e.g., "150+" -> 150)
+                const membersCount = parseInt(university.members);
+                totalMembers += membersCount;
+                
+                // Count initiatives
+                totalInitiatives += university.initiatives.length;
+            });
+            
+            // Update stats display
+            document.getElementById('total-members').textContent = totalMembers + '+';
+            document.getElementById('total-initiatives').textContent = totalInitiatives;
+        }
+        
+        calculateStats();
+        
+        // Handle window resize to make map responsive
+        window.addEventListener('resize', function() {
+            map.invalidateSize();
+        });
+        
+        // Make sure map is properly sized on load
+        setTimeout(function() {
+            map.invalidateSize();
+        }, 100);
+    </script>
+    <script>
+        // Toggle mobile navigation
+        const hamburger = document.querySelector('.hamburger');
+        const nav = document.querySelector('nav');
+        
+        hamburger.addEventListener('click', () => {
+            nav.classList.toggle('active');
+            hamburger.textContent = nav.classList.contains('active') ? '✕' : '☰';
+        });
+        
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!nav.contains(e.target) && !hamburger.contains(e.target) && nav.classList.contains('active')) {
+                nav.classList.remove('active');
+                hamburger.textContent = '☰';
+            }
+        });
+        
+        // Close mobile menu when window is resized above mobile breakpoint
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 768 && nav.classList.contains('active')) {
+                nav.classList.remove('active');
+                hamburger.textContent = '☰';
+            }
+        });
+    </script>
+</body>
+</html>
+    
