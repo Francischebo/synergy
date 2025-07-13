@@ -47,7 +47,7 @@ const programRoutes = require("./routes/admin/programRoutes");
 const app = express();
 
 const PORT = process.env.PORT || 10000;
->>>>>>> 7d98f5087cb08faeea6a2ac6d61fd639cdc9dc53
+
 const http = require("http").createServer(app);
 
 const connectDB = require('./config/db');
