@@ -37,7 +37,6 @@ const Subscriber = require("./models/Subscriber");
 const Summit = require("./models/Summit");
 const Testimonial = require("./models/Testimonial");
 
-
 const joinRoutes = require("./routes/joinRoute");
 const subscribeRoute = require("./routes/subscribeRoute");
 const eventRoutes = require("./routes/eventRoutes");
@@ -45,9 +44,7 @@ const programRoutes = require("./routes/admin/programRoutes");
 
 // Initialize Express
 const app = express();
-
-const PORT = process.env.PORT || 10000;
-
+const PORT = process.env.PORT || 15000;
 const http = require("http").createServer(app);
 
 const connectDB = require('./config/db');
