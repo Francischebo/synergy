@@ -4,7 +4,7 @@
     "description": "",
     "main": "create-admin.js",
     "scripts": {
-        "build": "mkdir -p dist && cp -r backend/* dist/",
+        "build": "mkdir -p dist && cp -r . dist/",
         "start": "serve -s dist -l 10000"
     },
     "keywords": [],
