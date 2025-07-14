@@ -197,29 +197,6 @@ app.use("/api", require("./routes/chapterRoutes"));
 app.use("/api", require("./routes/applicantRoute"));
 app.use('/uploads/applications', express.static('uploads/applications'));
 
-async function seedPositions() {
-    try {
-        const mongoUri = process.env.ADMIN_URL;
-        if (!mongoUri) throw new Error("MONGO_URI not set");
-
-        await mongoose.connect(mongoUri);
-        console.log("✅ MongoDB connected");
-
-        await Leadership.deleteMany({});
-        await Leadership.insertMany([
-            { position: 'Treasurer' },
-            { position: 'Regional Coordinator' },
-            { position: 'Programs Officer' },
-        ]);
-        console.log("✅ Seed data inserted");
-    } catch (err) {
-        console.error("❌ Error seeding data:", err.message);
-    } finally {
-        await mongoose.disconnect();
-    }
-}
-seedPositions();
-
 async function createAdmin() {
     const username = "admin1";
     const password = "adminFrancis389987653_"; // Change this in prod!
