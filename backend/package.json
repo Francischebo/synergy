@@ -4,7 +4,7 @@
     "description": "",
     "main": "create-admin.js",
     "scripts": {
-        "build": "if not exist dist mkdir dist && xcopy /E /I backend dist",
+        "build": "mkdir -p dist && cp -r backend/* dist/",
         "start": "serve -s dist -l 10000"
     },
     "keywords": [],
