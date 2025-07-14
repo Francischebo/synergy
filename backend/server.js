@@ -200,7 +200,7 @@ app.use('/uploads/applications', express.static('uploads/applications'));
 async function seedPositions() {
     try {
         const mongoUri = process.env.ADMIN_URL;
-        if (!mongoUri) throw new Error("MONGO_URL not set");
+        if (!mongoUri) throw new Error("MONGO_URI not set");
 
         await mongoose.connect(mongoUri);
         console.log("✅ MongoDB connected");
@@ -225,7 +225,7 @@ async function createAdmin() {
     const password = "adminFrancis389987653_"; // Change this in prod!
 
     try {
-        const mongoUri = process.env.MONGO_URL;
+        const mongoUri = process.env.MONGO_URI;
         if (!mongoUri) throw new Error("MONGO_URL not set");
 
         await mongoose.connect(mongoUri);
