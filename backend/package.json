@@ -4,8 +4,8 @@
     "description": "",
     "main": "create-admin.js",
     "scripts": {
-        "build": "mkdir -p dist && cp server.js package.json .env dist/",
-        "start": "serve -s dist -l 10000"
+        "build": "mkdir -p dist && cp server.js package.json .env dist/ && cd dist && npm install",
+        "start": "node server.js"
     },
     "keywords": [],
     "author": "",
