@@ -8,7 +8,7 @@ async function createAdmin() {
     const password = "adminFrancis389987653_"; // Change this in prod!
 
     try {
-        const mongoUri = process.env.MONGO_URL;
+        const mongoUri = process.env.MONGO_URI;
         if (!mongoUri) throw new Error("MONGO_URL not set");
 
         await mongoose.connect(mongoUri);
