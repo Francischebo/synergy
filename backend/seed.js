@@ -1,13 +1,7 @@
-// seeds/seed.js
-const mongoose = require('mongoose');
-const dotenv = require('dotenv').config();
-
-const Leadership = require('./models/Leadership');
-
 async function seedPositions() {
     try {
-        const mongoUri = process.env.MONGO_URL;
-        if (!mongoUri) throw new Error("MONGO_URL not set");
+        const mongoUri = process.env.ADMIN_URL;
+        if (!mongoUri) throw new Error("MONGO_URI not set");
 
         await mongoose.connect(mongoUri);
         console.log("✅ MongoDB connected");
@@ -25,5 +19,4 @@ async function seedPositions() {
         await mongoose.disconnect();
     }
 }
-
 seedPositions();
