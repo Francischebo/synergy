@@ -1,3 +1,9 @@
+// seeds/seed.js
+const mongoose = require('mongoose');
+const dotenv = require('dotenv').config();
+
+const Leadership = require('./models/Leadership');
+
 async function seedPositions() {
     try {
         const mongoUri = process.env.ADMIN_URL;
