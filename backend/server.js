@@ -177,19 +177,13 @@ app.use(express.static(path.join(__dirname, "backend")));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-const Admin = require('./models/Admin');
+
 
 async function createAdmin() {
     const username = "admin1";
     const password = "adminFr@389987653_"; // Change this in prod!
 
     try {
-        const mongoUri = process.env.MONGO_URI;
-        if (!mongoUri) throw new Error("MONGO_URL not set");
-
-        await mongoose.connect(mongoUri);
-        console.log("✅ MongoDB connected");
-
         const existingAdmin = await Admin.findOne({ username });
         if (existingAdmin) {
             console.log("⚠️ Admin already exists");
@@ -202,8 +196,6 @@ async function createAdmin() {
         console.log("✅ Admin created successfully");
     } catch (err) {
         console.error("❌ Error creating admin:", err.message);
-    } finally {
-        await mongoose.disconnect();
     }
 }
 
