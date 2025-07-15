@@ -177,7 +177,20 @@ app.use(express.static(path.join(__dirname, "backend")));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-
+async function seedPositions() {
+    try {
+        await Leadership.deleteMany({});
+        await Leadership.insertMany([
+            { position: 'Treasurer' },
+            { position: 'Regional Coordinator' },
+            { position: 'Programs Officer' },
+        ]);
+        console.log("✅ Seed data inserted");
+    } catch (err) {
+        console.error("❌ Error seeding data:", err.message);
+    }
+}
+seedPositions();
 
 async function createAdmin() {
     const username = "admin1";
