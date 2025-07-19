@@ -4,7 +4,7 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "build": "if not exist dist mkdir dist && xcopy /E /I frontend dist",
+        "build": "if not exist dist mkdir dist && cp /E /I frontend dist",
         "start": "serve -s dist -l 10000"
     },
     "keywords": [],
