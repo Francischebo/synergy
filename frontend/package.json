@@ -4,7 +4,7 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "build": "cd frontend && npm run build && cd .. && mkdir -p dist && cp -r frontend/build dist/",
+        "build": "if [ -d \"frontend\" ]; then cd frontend && npm run build && cd .. && mkdir -p dist && cp -r frontend/build dist/; else echo 'frontend folder not found'; exit 1; fi",
         "start": "serve -s dist -l 10000"
     },
     "keywords": [],
